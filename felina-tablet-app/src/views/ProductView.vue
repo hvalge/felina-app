@@ -1,8 +1,12 @@
 <template>
   <div>
     <h1>Tooted</h1>
-    <div class="product-grid">
-      <ProductCard v-for="product in products" :key="product.ean" :product="product" />
+    <SearchBar @search="findAndAddProduct" />
+    <div v-if="loading">Laen...</div>
+    <div v-if="error" class="error">{{ error }}</div>
+    <div v-if="product" class="found-product">
+        <h2>Leitud Toode</h2>
+        <ProductCard :product="product" />
     </div>
   </div>
 </template>
@@ -11,33 +15,42 @@
 import { ref } from 'vue';
 import type { Ref } from 'vue';
 import type { Product } from '@/types';
+import { getProductByEan } from '@/services/apiService';
+import { useCartStore } from '@/stores/cart';
+import SearchBar from '@/components/SearchBar.vue';
 import ProductCard from '@/components/ProductCard.vue';
 
-// Mock data - this would come from an API call
-const products: Ref<Product[]> = ref([
-  {
-    ean: '1234567890123',
-    name: 'Elegant Lingerie Set',
-    description: 'A beautiful and comfortable set.',
-    price: 79.99,
-    imageUrl: 'https://via.placeholder.com/150',
-    stock: 10,
-  },
-  {
-    ean: '9876543210987',
-    name: 'Silk Night Gown',
-    description: 'Luxurious silk for a perfect night.',
-    price: 129.50,
-    imageUrl: 'https://via.placeholder.com/150',
-    stock: 5,
-  },
-]);
+const product: Ref<Product | null> = ref(null);
+const loading: Ref<boolean> = ref(false);
+const error: Ref<string | null> = ref(null);
+const cartStore = useCartStore();
+
+async function findAndAddProduct(ean: string): Promise<void> {
+  loading.value = true;
+  error.value = null;
+  product.value = null;
+  try {
+    const foundProduct = await getProductByEan(ean);
+    if (foundProduct) {
+      product.value = foundProduct;
+      cartStore.addItem(foundProduct);
+    } else {
+      error.value = `Toodet koodiga ${ean} ei leitud.`;
+    }
+  } catch (err) {
+    error.value = 'Toote otsimisel tekkis viga.';
+  } finally {
+    loading.value = false;
+  }
+}
 </script>
 
 <style scoped>
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+.error {
+  color: red;
+  margin-bottom: 1rem;
+}
+.found-product {
+    margin-top: 2rem;
 }
 </style>

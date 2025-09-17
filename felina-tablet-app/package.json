@@ -1,6 +1,7 @@
 {
   "name": "felina-tablet-app",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Frontend for the Felina Showroom App",
   "private": true,
   "type": "module",
   "engines": {
