@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { Product } from '../types';
+import type { Product } from '../types/index.js';
 
 // Mock database of products
 const products: Product[] = [

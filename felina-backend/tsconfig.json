@@ -6,8 +6,8 @@
     "skipLibCheck": true,
     "allowJs": false,
 
-    "module": "es2022",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
 
     "verbatimModuleSyntax": true,
     "isolatedModules": true,

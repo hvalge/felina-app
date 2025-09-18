@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
-import type { OrderPayload } from '../types';
+import type { OrderPayload } from '../types/index.js';
 
 /**
  * Handles the creation of a new order.

@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import productRoutes from './routes/productRoutes';
-import orderRoutes from './routes/orderRoutes';
-import { verifyApiKey } from './middleware/authMiddleware';
+import productRoutes from './routes/productRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import { verifyApiKey } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
@@ -25,7 +25,7 @@ apiRouter.use('/orders', orderRoutes);
 
 app.use('/api', apiRouter);
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send('Felina Backend is running!');
 });
 

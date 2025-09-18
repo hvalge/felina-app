@@ -59,6 +59,6 @@ nav a {
 }
 nav a:hover,
 nav a.router-link-exact-active {
-  color: #d33692; /* A pinkish brand color */
+  color: #d33692;
 }
 </style>
