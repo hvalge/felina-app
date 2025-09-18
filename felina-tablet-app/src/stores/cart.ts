@@ -2,9 +2,11 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { Ref, ComputedRef } from 'vue';
 import type { CartItem, Product } from '@/types';
+import { useNotificationStore } from './notifications';
 
 export const useCartStore = defineStore('cart', () => {
   const items: Ref<Map<string, CartItem>> = ref(new Map());
+  const notificationStore = useNotificationStore();
 
   const cartItems: ComputedRef<CartItem[]> = computed(() => Array.from(items.value.values()));
   const cartTotal: ComputedRef<number> = computed(() => {
@@ -19,14 +21,16 @@ export const useCartStore = defineStore('cart', () => {
       const existingItem = items.value.get(product.ean)!;
       if (existingItem.quantity < product.stock) {
         existingItem.quantity++;
+        notificationStore.addNotification(`${product.name} lisati ostukorvi.`, 'success');
       } else {
-        alert('Maksimaalne laokogus on saavutatud!');
+        notificationStore.addNotification('Maksimaalne laokogus on saavutatud!', 'error');
       }
     } else {
        if (product.stock > 0) {
          items.value.set(product.ean, { ...product, quantity: 1 });
+         notificationStore.addNotification(`${product.name} lisati ostukorvi.`, 'success');
        } else {
-         alert('Toode on laost otsas!');
+         notificationStore.addNotification('Toode on laost otsas!', 'error');
        }
     }
   }
@@ -39,6 +43,7 @@ export const useCartStore = defineStore('cart', () => {
         } else {
             items.value.delete(ean);
         }
+        notificationStore.addNotification(`${item.name} eemaldati ostukorvist.`, 'success');
     }
   }
 

@@ -9,9 +9,6 @@
             <p>Teie tellimuse number on: {{ orderId }}</p>
             <p>Saadame peagi kinnituse teie e-posti aadressile.</p>
         </div>
-        <div v-if="error" class="error-message">
-            <p>{{ error }}</p>
-        </div>
     </div>
 </template>
 
@@ -20,45 +17,68 @@ import { ref } from 'vue';
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
-import type { CustomerDetails } from '@/types';
+import { useDeviceStore } from '@/stores/device';
+import { useNotificationStore } from '@/stores/notifications';
+import type { CustomerDetails, OrderPayload } from '@/types';
 import { createOrder } from '@/services/apiService';
 import CheckoutForm from '@/components/CheckoutForm.vue';
 
 const cartStore = useCartStore();
+const deviceStore = useDeviceStore();
+const notificationStore = useNotificationStore();
 const router = useRouter();
 const orderPlaced: Ref<boolean> = ref(false);
 const orderId: Ref<string | null> = ref(null);
-const error: Ref<string | null> = ref(null);
 
 async function handleOrderSubmit(details: CustomerDetails): Promise<void> {
-    error.value = null;
-    const result = await createOrder(cartStore.cartItems, details);
-    if (result.success && result.orderId) {
-        orderPlaced.value = true;
-        orderId.value = result.orderId;
-        cartStore.clearCart();
-        setTimeout(() => router.push('/'), 5000); // Redirect after 5s
-    } else {
-        error.value = "Tellimuse esitamisel tekkis viga. Palun proovige uuesti.";
+    if (!deviceStore.storeId || !deviceStore.deviceId) {
+        notificationStore.addNotification('Seadme andmed puuduvad. Palun kontakteeruge personaliga.', 'error');
+        return;
+    }
+
+    const orderPayload: OrderPayload = {
+        items: cartStore.cartItems,
+        customer: details,
+        storeId: deviceStore.storeId,
+        deviceId: deviceStore.deviceId
+    };
+
+    try {
+        // Mock a successful payment.
+        const paymentSuccessful = true;
+
+        if (paymentSuccessful) {
+            const result = await createOrder(orderPayload);
+            if (result.success && result.orderId) {
+                orderPlaced.value = true;
+                orderId.value = result.orderId;
+                cartStore.clearCart();
+                notificationStore.addNotification('Tellimus edukalt esitatud!', 'success');
+                setTimeout(() => router.push('/'), 5000);
+            } else {
+                notificationStore.addNotification('Tellimuse esitamisel tekkis viga.', 'error');
+            }
+        } else {
+            notificationStore.addNotification('Makse ebaõnnestus.', 'error');
+        }
+    } catch (err) {
+        if (err instanceof Error) {
+            notificationStore.addNotification(err.message, 'error');
+        } else {
+            notificationStore.addNotification('Tellimuse esitamisel tekkis tundmatu viga.', 'error');
+        }
     }
 }
 </script>
 
 <style scoped>
-.success-message, .error-message {
+.success-message {
     text-align: center;
     padding: 2rem;
     border-radius: 8px;
     margin-top: 2rem;
-}
-.success-message {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
-}
-.error-message {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
 }
 </style>
