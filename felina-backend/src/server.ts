@@ -1,14 +1,28 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import pino from 'pino';
+import pinoHttp from 'pino-http';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import { verifyApiKey } from './middleware/authMiddleware.js';
 
 dotenv.config();
 
+const logger = pino({
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+      ignore: 'pid,hostname',
+    },
+  },
+});
+
 const app = express();
 const port = process.env['PORT'] || 3000;
+
+app.use(pinoHttp({ logger }));
 
 const corsOptions = {
   origin: process.env['ALLOWED_ORIGIN'],
@@ -30,5 +44,5 @@ app.get('/', (_req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  logger.info(`Server is running on http://localhost:${port}`);
 });

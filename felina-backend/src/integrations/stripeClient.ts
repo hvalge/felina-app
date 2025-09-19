@@ -1,4 +1,7 @@
 import type { OrderPayload } from '../types/index.js';
+import pino from 'pino';
+
+const logger = pino();
 
 // Real application would use the official 'stripe' Node.js library.
 
@@ -13,7 +16,7 @@ export const processPayment = async (orderData: OrderPayload, paymentToken: stri
   // Stripe expects the amount in the smallest currency unit (e.g., cents).
   const amountInCents = Math.round(totalAmount * 100);
 
-  console.log(`[Stripe Service] Processing payment of €${totalAmount.toFixed(2)} (${amountInCents} cents)`);
+  logger.info(`[Stripe Service] Processing payment of €${totalAmount.toFixed(2)} (${amountInCents} cents)`);
   
   // MOCK STRIPE API CALL
   // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -27,10 +30,10 @@ export const processPayment = async (orderData: OrderPayload, paymentToken: stri
   
   // Simulate a successful payment based on the mock token.
   if (paymentToken === 'tok_mockSuccess') {
-    console.log('[Stripe Service] Payment successful.');
+    logger.info('[Stripe Service] Payment successful.');
     return Promise.resolve(true);
   } else {
-    console.error('[Stripe Service] Payment failed.');
+    logger.error('[Stripe Service] Payment failed.');
     return Promise.resolve(false);
   }
 };

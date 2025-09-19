@@ -2,13 +2,18 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { logger } from '@/utils/logger';
 
 import App from './App.vue'
 import router from './router'
+
+logger.info('Felina Showroom App is starting...');
 
 const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
 
-app.mount('#app')
+app.mount('#app');
+
+logger.info('App mounted successfully!');

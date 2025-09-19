@@ -1,4 +1,7 @@
 import type { OrderPayload } from '../types/index.js';
+import pino from 'pino';
+
+const logger = pino();
 
 // This is a mock Odoo API client. In a real application, this would
 // use a library like 'axios' to make HTTP requests to the Odoo ERP.
@@ -9,7 +12,7 @@ import type { OrderPayload } from '../types/index.js';
  * @returns A promise that resolves to true if all items are in stock.
  */
 export const checkStockWithOdoo = async (items: OrderPayload['items']): Promise<boolean> => {
-  console.log('[Odoo Service] Checking stock for', items.map(i => `${i.name} (Qty: ${i.quantity})`).join(', '));
+  logger.info(`[Odoo Service] Checking stock for: ${items.map(i => `${i.name} (Qty: ${i.quantity})`).join(', ')}`);
   // In a real implementation, you would loop through items and query the Odoo API.
   // For now, we will assume everything is in stock if we found it initially.
   // A real check would be crucial to handle race conditions where stock changes
@@ -23,7 +26,7 @@ export const checkStockWithOdoo = async (items: OrderPayload['items']): Promise<
  * @returns A promise that resolves with the Odoo order reference ID.
  */
 export const createOrderInOdoo = async (orderData: OrderPayload): Promise<string> => {
-  console.log('[Odoo Service] Creating order with payload:', JSON.stringify(orderData, null, 2));
+  logger.info({ orderData }, '[Odoo Service] Creating order with payload');
   
   // MOCK API CALL TO ODOO
   // const odooApiEndpoint = `${process.env.ODOO_API_URL}/sale.order`;
@@ -33,7 +36,7 @@ export const createOrderInOdoo = async (orderData: OrderPayload): Promise<string
 
   // For now, return a mock Odoo order ID.
   const mockOdooOrderId = `SO${Math.floor(10000 + Math.random() * 90000)}`;
-  console.log(`[Odoo Service] Successfully created order. Odoo ID: ${mockOdooOrderId}`);
+  logger.info(`[Odoo Service] Successfully created order. Odoo ID: ${mockOdooOrderId}`);
   
   return Promise.resolve(mockOdooOrderId);
 };

@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import type { Ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
@@ -22,6 +22,7 @@ import { useNotificationStore } from '@/stores/notifications';
 import type { CustomerDetails, OrderPayload } from '@/types';
 import { createOrder } from '@/services/apiService';
 import CheckoutForm from '@/components/CheckoutForm.vue';
+import { logger } from '@/utils/logger';
 
 const cartStore = useCartStore();
 const deviceStore = useDeviceStore();
@@ -30,9 +31,16 @@ const router = useRouter();
 const orderPlaced: Ref<boolean> = ref(false);
 const orderId: Ref<string | null> = ref(null);
 
+onMounted(() => {
+    logger.info('CheckoutView mounted.');
+});
+
 async function handleOrderSubmit(details: CustomerDetails): Promise<void> {
+    logger.info({ customerDetails: details }, 'Handling order submission.');
     if (!deviceStore.storeId || !deviceStore.deviceId) {
-        notificationStore.addNotification('Seadme andmed puuduvad. Palun kontakteeruge personaliga.', 'error');
+        const message = 'Seadme andmed puuduvad. Palun kontakteeruge personaliga.';
+        notificationStore.addNotification(message, 'error');
+        logger.error(message);
         return;
     }
 
@@ -46,6 +54,7 @@ async function handleOrderSubmit(details: CustomerDetails): Promise<void> {
     try {
         // Mock a successful payment.
         const paymentSuccessful = true;
+        logger.info(`Payment processing: ${paymentSuccessful ? 'successful' : 'failed'}`);
 
         if (paymentSuccessful) {
             const result = await createOrder(orderPayload);
@@ -54,18 +63,25 @@ async function handleOrderSubmit(details: CustomerDetails): Promise<void> {
                 orderId.value = result.orderId;
                 cartStore.clearCart();
                 notificationStore.addNotification('Tellimus edukalt esitatud!', 'success');
+                logger.info({ orderId: result.orderId }, 'Order placed successfully.');
                 setTimeout(() => router.push('/'), 5000);
             } else {
-                notificationStore.addNotification('Tellimuse esitamisel tekkis viga.', 'error');
+                const message = 'Tellimuse esitamisel tekkis viga.';
+                notificationStore.addNotification(message, 'error');
+                logger.error(message);
             }
         } else {
-            notificationStore.addNotification('Makse ebaõnnestus.', 'error');
+            const message = 'Makse ebaõnnestus.';
+            notificationStore.addNotification(message, 'error');
+            logger.error(message);
         }
     } catch (err) {
         if (err instanceof Error) {
             notificationStore.addNotification(err.message, 'error');
+            logger.error({ err }, 'Error during order submission.');
         } else {
             notificationStore.addNotification('Tellimuse esitamisel tekkis tundmatu viga.', 'error');
+            logger.error('Unknown error during order submission.');
         }
     }
 }

@@ -32,11 +32,15 @@ const products: Product[] = [
 
 export const getProductByEan = (req: Request, res: Response) => {
   const { ean } = req.params;
+  const logger = req.log;
+  logger.info(`Fetching product with EAN: ${ean}`);
   const product = products.find(p => p.ean === ean);
 
   if (product) {
+    logger.info({ product }, `Found product with EAN: ${ean}`);
     res.json(product);
   } else {
+    logger.warn(`Product with EAN: ${ean} not found`);
     res.status(404).json({ message: 'Toodet ei leitud' });
   }
 };
