@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "tsx watch --inspect-brk src/server.ts",
+    "dev": "tsx watch --inspect src/server.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -19,7 +19,8 @@
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "pino": "^9.10.0",
-    "pino-http": "^10.5.0"
+    "pino-http": "^10.5.0",
+    "pino-pretty": "^13.1.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

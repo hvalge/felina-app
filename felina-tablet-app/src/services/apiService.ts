@@ -10,6 +10,44 @@ const apiClient = axios.create({
   },
 });
 
+// Add a request interceptor
+apiClient.interceptors.request.use(
+  (config) => {
+    // Log the request method and full URL
+    logger.info(`Sending ${config.method?.toUpperCase()} request to ${config.baseURL}${config.url}`);
+    
+    // Log the request body for POST/PUT/PATCH requests
+    if (config.data && (config.method === 'post' || config.method === 'put' || config.method === 'patch')) {
+      logger.info('Request body:', config.data);
+    }
+    
+    return config;
+  },
+  (error) => {
+    // Handle request error
+    logger.error({ error }, 'Request failed before being sent.');
+    return Promise.reject(error);
+  }
+);
+
+// Add a response interceptor
+apiClient.interceptors.response.use(
+  (response) => {
+    // Log successful responses
+    logger.info(`Received response for ${response.config.method?.toUpperCase()} ${response.config.url} with status ${response.status}`);
+    return response;
+  },
+  (error) => {
+    // Handle response errors
+    if (axios.isAxiosError(error)) {
+      logger.error(`Request to ${error.config?.url} failed with status ${error.response?.status}`);
+    } else {
+      logger.error({ error }, 'An unexpected error occurred during the request.');
+    }
+    return Promise.reject(error);
+  }
+);
+
 export async function getProductByEan(ean: string): Promise<Product | null> {
   logger.info(`Attempting to fetch product with EAN: ${ean}`);
   try {
