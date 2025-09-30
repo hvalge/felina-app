@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { useCartStore } from '../stores/cart';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +18,14 @@ const router = createRouter({
       path: '/checkout',
       name: 'checkout',
       component: () => import('../views/CheckoutView.vue'),
+      beforeEnter: (_to, _from, next) => {
+        const cartStore = useCartStore();
+        if (cartStore.cartItemCount === 0) {
+          next({ name: 'products' });
+        } else {
+          next();
+        }
+      },
     },
   ],
 });

@@ -15,11 +15,13 @@
   <main>
     <RouterView />
   </main>
+  <Notifications />
 </template>
 
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router';
 import { useCartStore } from '@/stores/cart';
+import Notifications from '@/components/NotificationList.vue';
 
 const cartStore = useCartStore();
 </script>

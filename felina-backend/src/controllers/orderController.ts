@@ -2,14 +2,11 @@ import type { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
 import type { OrderPayload } from '../types/index.js';
 
-/**
- * Handles the creation of a new order.
- * In a real application, this would interact with a database and the Odoo ERP.
- */
+// In a real application, this would interact with a database and the Odoo ERP.
 export const createOrder = (req: Request, res: Response) => {
   const orderData: OrderPayload = req.body;
+  const logger = req.log;
 
-  // Basic validation
   if (!orderData.items || orderData.items.length === 0 || !orderData.customer || !orderData.storeId || !orderData.deviceId) {
     return res.status(400).json({ message: 'Invalid order data' });
   }
@@ -20,7 +17,7 @@ export const createOrder = (req: Request, res: Response) => {
   // 3. Send the order to the Odoo ERP via its API.
   // 4. Handle any potential errors from these services.
   
-  console.log('Received new order:', JSON.stringify(orderData, null, 2));
+  logger.info({ order: orderData }, 'Received new order');
   
   const orderId = randomUUID().substring(0, 8).toUpperCase();
 

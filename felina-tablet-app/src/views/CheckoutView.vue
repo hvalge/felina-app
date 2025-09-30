@@ -36,7 +36,7 @@ onMounted(() => {
 });
 
 async function handleOrderSubmit(details: CustomerDetails): Promise<void> {
-    logger.info({ customerDetails: details }, 'Handling order submission.');
+    logger.info('Handling order submission.');
     if (!deviceStore.storeId || !deviceStore.deviceId) {
         const message = 'Seadme andmed puuduvad. Palun kontakteeruge personaliga.';
         notificationStore.addNotification(message, 'error');

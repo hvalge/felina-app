@@ -5,6 +5,8 @@ const isProduction = process.env["NODE_ENV"] === "production";
 const logger = pino({
   level: process.env["LOG_LEVEL"] || "info",
 
+  redact: isProduction ? ['customer', 'customer.name', 'customer.email', 'customer.address'] : [],
+
   formatters: {
     level(label) {
       return { level: label };

@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import type { Ref } from 'vue';
 import type { Product } from '@/types';
 import { getProductByEan } from '@/services/apiService';
@@ -25,9 +25,6 @@ const product: Ref<Product | null> = ref(null);
 const loading: Ref<boolean> = ref(false);
 const cartStore = useCartStore();
 const notificationStore = useNotificationStore();
-
-let eanBuffer = '';
-let lastKeyTime = Date.now();
 
 async function findAndAddProduct(ean: string): Promise<void> {
   loading.value = true;
@@ -55,34 +52,6 @@ async function findAndAddProduct(ean: string): Promise<void> {
     loading.value = false;
   }
 }
-
-function handleKeyPress(e: KeyboardEvent) {
-    if (e.key === 'Enter') {
-        if (eanBuffer.length > 0) {
-            findAndAddProduct(eanBuffer);
-            eanBuffer = '';
-        }
-        return;
-    }
-
-    const currentTime = Date.now();
-    if (currentTime - lastKeyTime > 50) { // Reset buffer if typing is too slow
-        eanBuffer = '';
-    }
-    eanBuffer += e.key;
-    lastKeyTime = currentTime;
-}
-
-onMounted(() => {
-    logger.info('ProductView mounted. Attaching keypress listener.');
-    window.addEventListener('keypress', handleKeyPress);
-});
-
-onUnmounted(() => {
-    logger.info('ProductView unmounted. Removing keypress listener.');
-    window.removeEventListener('keypress', handleKeyPress);
-});
-
 </script>
 
 <style scoped>
