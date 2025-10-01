@@ -1,13 +1,21 @@
 import express, { type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import httpLogger, { pinoHttp } from "pino-http";
+import { pinoHttp } from "pino-http";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import { verifyApiKey } from "./middleware/authMiddleware.js";
 import logger from "./utils/logger.js";
 
 dotenv.config();
+
+const requiredEnvVars = ['TABLET_API_KEY', 'ALLOWED_ORIGIN'];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  logger.error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
+  process.exit(1);
+}
 
 const app = express();
 const port = process.env["PORT"] || 3000;
