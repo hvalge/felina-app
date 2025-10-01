@@ -1,7 +1,7 @@
-import express from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import httpLogger from "pino-http";
+import httpLogger, { pinoHttp } from "pino-http";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import { verifyApiKey } from "./middleware/authMiddleware.js";
@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 const port = process.env["PORT"] || 3000;
 
-app.use(httpLogger({ logger }));
+app.use(pinoHttp({ logger }));
 
 const corsOptions = {
   origin: process.env["ALLOWED_ORIGIN"],
@@ -29,13 +29,25 @@ apiRouter.use("/orders", orderRoutes);
 
 app.use("/api", apiRouter);
 
-app.get("/", (_req, res) => {
+app.get("/", (_req: Request, res: Response) => {
   res.send("Felina Backend is running!");
 });
 
-// app.use((_err: any, _req: Request, res: Response, _next: NextFunction) => {
-//   res.status(500).send("Internal Server Error");
-// });
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  const requestLogger = req.log;
+  requestLogger.error({ err }, "An unhandled error occurred in a request handler");
+
+  const isProduction = process.env["NODE_ENV"] === "production";
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+
+  res.status(statusCode).json({
+    success: false,
+    message: message,
+    stack: isProduction ? undefined : err.stack,
+  });
+});
+
 
 app.listen(port, () => {
   logger.info(`Server is running on http://localhost:${port}`);
