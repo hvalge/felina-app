@@ -4,6 +4,7 @@ import type { Ref, ComputedRef } from 'vue';
 import type { CartItem, Product } from '@/types';
 import { useNotificationStore } from './notifications';
 import { logger } from '@/utils/logger';
+import { getProductByEan } from '@/services/apiService';
 
 export const useCartStore = defineStore('cart', () => {
   const items: Ref<Map<string, CartItem>> = ref(new Map());
@@ -61,5 +62,30 @@ export const useCartStore = defineStore('cart', () => {
     items.value.clear();
   }
 
-  return { items, cartItems, cartTotal, cartItemCount, addItem, removeItem, clearCart };
+  async function fetchAndAddItemByEan(ean: string): Promise<Product | null> {
+    logger.info(`Attempting to fetch and add product with EAN: ${ean}`);
+    try {
+      const foundProduct = await getProductByEan(ean);
+      if (foundProduct) {
+        addItem(foundProduct);
+        logger.info({ product: foundProduct }, `Product found and added to cart.`);
+        return foundProduct;
+      } else {
+        notificationStore.addNotification(`Toodet koodiga ${ean} ei leitud.`, 'error');
+        logger.warn(`Product not found for EAN: ${ean}`);
+        return null;
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+          notificationStore.addNotification(err.message, 'error');
+          logger.error({ err }, 'Error during product fetch and add.');
+      } else {
+          notificationStore.addNotification('Toote otsimisel tekkis tundmatu viga.', 'error');
+          logger.error('Unknown error during product fetch and add.');
+      }
+      return null;
+    }
+  }
+
+  return { items, cartItems, cartTotal, cartItemCount, addItem, removeItem, clearCart, fetchAndAddItemByEan };
 });
