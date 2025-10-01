@@ -37,7 +37,7 @@ async function findAndAddProduct(ean: string): Promise<void> {
       cartStore.addItem(foundProduct);
       logger.info({ product: foundProduct }, `Product found and added to cart.`);
     } else {
-      notificationStore.addNotification(`Toodet koodiga ${ean} ei leitud.`, 'error');
+      notificationStore.addNotification(`Toodet koodiga ${ean} ei leitud. Palun kontrollige koodi ja proovige uuesti.`, 'error');
       logger.warn(`Product not found for EAN: ${ean}`);
     }
   } catch (err) {
@@ -45,7 +45,7 @@ async function findAndAddProduct(ean: string): Promise<void> {
         notificationStore.addNotification(err.message, 'error');
         logger.error({ err }, 'Error during product search.');
     } else {
-        notificationStore.addNotification('Toote otsimisel tekkis tundmatu viga.', 'error');
+        notificationStore.addNotification('Toote otsimisel tekkis ootamatu viga. Palun proovige hiljem uuesti.', 'error');
         logger.error('Unknown error during product search.');
     }
   } finally {

@@ -52,7 +52,6 @@ async function handleOrderSubmit(details: CustomerDetails): Promise<void> {
     };
 
     try {
-        // Mock a successful payment.
         const paymentSuccessful = true;
         logger.info(`Payment processing: ${paymentSuccessful ? 'successful' : 'failed'}`);
 
@@ -66,12 +65,12 @@ async function handleOrderSubmit(details: CustomerDetails): Promise<void> {
                 logger.info({ orderId: result.orderId }, 'Order placed successfully.');
                 setTimeout(() => router.push('/'), 5000);
             } else {
-                const message = 'Tellimuse esitamisel tekkis viga.';
+                const message = 'Tellimuse esitamisel tekkis viga. Palun proovige uuesti.';
                 notificationStore.addNotification(message, 'error');
                 logger.error(message);
             }
         } else {
-            const message = 'Makse ebaõnnestus.';
+            const message = 'Makse ebaõnnestus. Palun kontrollige oma makseandmeid ja proovige uuesti.';
             notificationStore.addNotification(message, 'error');
             logger.error(message);
         }
@@ -80,7 +79,7 @@ async function handleOrderSubmit(details: CustomerDetails): Promise<void> {
             notificationStore.addNotification(err.message, 'error');
             logger.error({ err }, 'Error during order submission.');
         } else {
-            notificationStore.addNotification('Tellimuse esitamisel tekkis tundmatu viga.', 'error');
+            notificationStore.addNotification('Tellimuse esitamisel tekkis ootamatu viga. Palun proovige hiljem uuesti.', 'error');
             logger.error('Unknown error during order submission.');
         }
     }
